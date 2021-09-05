@@ -1,1 +1,1 @@
-# particle_simulator
+Particle Simulator using pygame
