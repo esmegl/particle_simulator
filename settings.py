@@ -12,8 +12,12 @@ ACCELERATION = 9.8
 FPS = 60
 
 # Grid box size
-TILE_SIZE = 10
-TILE_INDEX_X = WINDOW_WIDTH / TILE_SIZE 
+TILE_SIZE = 5
+TILE_INDEX_X = WINDOW_WIDTH // TILE_SIZE
+TILE_INDEX_Y = WINDOW_HEIGHT // TILE_SIZE
+
+# Total number of tiles
+TILE_Q = int(WINDOW_HEIGHT / TILE_SIZE) * int(WINDOW_WIDTH / TILE_SIZE)
 
 # ---------------------------------- Colors ---------------------------------- #
 #           R	 G    B
