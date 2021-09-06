@@ -13,6 +13,7 @@ FPS = 60
 
 # Grid box size
 TILE_SIZE = 10
+TILE_INDEX_X = WINDOW_WIDTH / TILE_SIZE 
 
 # ---------------------------------- Colors ---------------------------------- #
 #           R	 G    B

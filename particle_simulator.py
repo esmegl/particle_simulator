@@ -11,6 +11,13 @@ pg.display.set_caption(TITLE)
 
 # ---------------------------------- Functions ---------------------------------- #
 
+# Grid array size (WINDOW_HEIGHT / TILE_SIZE) * (WINDOW_WIDHT / TILE_SIZE), enumerate the tiles
+grid = [0 for i in range((WINDOW_HEIGHT / TILE_SIZE) * (WINDOW_WIDHT / TILE_SIZE))]
+
+# Retutns the number of the tile I want to select
+def flatten_index(pos_x, pos_y):
+	return tile_index = (pos_x + pos_y * TILE_INDEX_X)
+
 def draw_grid():
 	for i in range(0, WINDOW_WIDTH, TILE_SIZE):
 		pg.draw.line(SCREEN, L_GREY, (i, 0), (i, WINDOW_HEIGHT), 1)
@@ -24,13 +31,12 @@ def is_empty (x, y) -> bool:
 
 # ---------------------------------- Classes ---------------------------------- #
 
-""" class Sand:
+class Sand:
 
 	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-		
-		...
+		# Truncate the position of the mouse in both axes
+		self.x = math.floor(x)
+		self.y = math.floor(y)
 
 	def update (self):
 
@@ -54,8 +60,9 @@ def is_empty (x, y) -> bool:
 				self.go_left = False
 
 	def draw (self):
-		...
-"""
+		for _ in range(0, len(grid) - 1):
+			if grid[_] == 1:
+				pg.draw.rect(SCREEN, YELLOW, )
 
 class Water:
 
@@ -66,15 +73,15 @@ class Smoke:
 	# is_up = is_up = is_empty(x, y - 1)
 	...
 
-# Initial mouse positon
-x = pg.mouse.get_pos()[0]
-y = pg.mouse.get_pos()[1]
+running = False
 
-# sand = Sand(x, y)
+# The simulation begins with the first click
+if pg.mouse.get_pressed(num_buttons=3)[0]:
+	x = pg.mouse.get_pos()[0]
+	y = pg.mouse.get_pos()[1]
 
-# square = Square()
-
-running = True
+	sand = Sand(x, y)
+	running = True
 # ---------------------------------- Main loop ---------------------------------- #
 while running:
 	
@@ -85,17 +92,12 @@ while running:
 			pg.quit()
 			sys.exit()
 
-		# Checks if the mouse is pressed
-		# print(pg.mouse.get_pressed(num_buttons=3)[0])
-
-
-	# selected_particle = 
-	draw_grid()
 
 	pg.display.update()
 	# Limit the framerate
 	CLOCK.tick(FPS)
 	SCREEN.fill(BLACK)
-	# square.update()
-	# square.draw()
+	draw_grid()
+	# sand.update()
+	# sand.draw()
 
