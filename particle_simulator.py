@@ -44,31 +44,11 @@ class Sandbox:
 		# Truncate the position of the mouse in both axes
 		self.mouse_x = math.floor(pg.mouse.get_pos()[0])
 		self.mouse_y = math.floor(pg.mouse.get_pos()[1])
-
-	def sand(self):
-		...
-
-	def water(self):
-		...
-
-	def smoke(self):
-		...
-
-	def fire(self):
-		...
-
-
-	# Checks if a tile is empty
-	def is_empty(self, ix) -> bool:
-
-		# Checks if ix is bigger than the last array index
-		if ix > TILE_Q:
-			empty = False
-
-		else:
-			empty = self.grid[ix] == 0
-
-		return empty
+		self.sand = 1
+		self.water = 2
+		self.smoke = 3
+		self.fire = 4
+		self.explotion = 5
 
 	def update (self):
 
@@ -83,46 +63,45 @@ class Sandbox:
 		if pg.mouse.get_pressed(num_buttons=3)[0]:
 			# If the mouse is pressed set that tile to 1
 			self.grid[mouse_tile_index] = 1
-
-			# Check the empty places for the sand particles to fall
-			# Check if the place below is empty
-			# self.go_down = self.is_empty(tile_index + TILE_INDEX_X)
-			# Check if the place below to the left is empty
-			# self.go_left = self.is_empty(tile_index + TILE_INDEX_X - 1) and self.go_down
-			# Check if the place below to the right is empty
-			# self.go_right = self.is_empty(tile_index + TILE_INDEX_X + 1) and self.go_down
 		
-		# If both places (left and right) are empty select a place to fall randomly
-		# if self.go_left and self.go_right:
-		# 	left = random.randint(0, 9)
-		# 	right = random.randint(0, 9)
 
-		# 	if left > right:
-		# 		self.go_right = False
-		# 	else:
-		# 		self.go_left = False 
-
-		for i in reversed(range(len(self.grid))):
+		for i in range(len(self.grid), 0, -1):
 			# Get the x and y coordinates to draw the rectangle
 			(x, y) = uflattern_index(i)
+
+			# If both places (left and right) are empty select a place to fall randomly
+			left = random.randint(0, 9)
+			right = random.randint(0, 9)
 
 			# Checks if y + 1 is out of range
 			if (y + 1 < TILE_INDEX_Y):
 				# Tile number of the tile below
 				tile_index_d = flatten_index(x, y + 1)
+				# Index down to the left
+				tile_index_dl = flatten_index(x - 1, y + 1)
 
-				# Debug
-				# print(tile_index_d)
-
+				# If the space below is empty "fall"
 				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
 					self.grid[i] = 0
 					self.grid[tile_index_d] = 1
-			# elif self.go_left and (i + TILE_INDEX_X < len(self.grid)):
-			# 	self.grid[i] = 0
-			# 	self.grid[i + TILE_INDEX_X - 1] = 1
-			# elif self.go_right and ((i + TILE_INDEX_X + 1) <= len(self.grid)):
-			# 	self.grid[i] = 0
-			# 	self.grid[i + TILE_INDEX_X + 1] = 1
+
+				# If the space below is not empty fall to the sides
+				# Prevents (x + 1) or (x -1) are out of range
+				elif (self.grid[tile_index_d] == 1) and (x - 1) > 0 and (x + 1) < TILE_INDEX_X:
+					
+					# If the space down is taken, fall left or right
+					if (left > right) and (self.grid[tile_index_dl] == 0):
+						self.grid[i] = 0
+						self.grid[tile_index_dl] = 1
+						# print(tile_index_dl)
+
+					# else: 
+					# 	# Index down to the right
+					# 	tile_index_dr = flatten_index(x + 1, y)
+
+					# 	if (left <= right) and self.grid[tile_index_dr] == 0:
+					# 		self.grid[i] = 0
+					# 		self.grid[tile_index_dr] = 1
 
 
 	def draw (self):
@@ -145,6 +124,35 @@ class Sandbox:
 			elif self.grid[i] == 4:
 				pg.draw.rect(SCREEN, ORANGE, r, 0)
 
+# class Button:
+ 
+#     def __init__(self, text, bg="BLACK", feedback=""):
+#         self.pos = (0, 0)
+#         self.font = pg.font.SysFont("Arial", font)
+#         if feedback == "":
+#             self.feedback = "text"
+#         else:
+#             self.feedback = feedback
+#         self.change_text(text, bg)
+ 
+#     def change_text(self, text, bg="BLACK"):
+#         """Change the text whe you click"""
+#         self.text = self.font.render(text, 1, pg.Color("WHITE"))
+#         self.size = self.text.get_size()
+#         self.surface = pg.Surface(self.size)
+#         self.surface.fill(bg)
+#         self.surface.blit(self.text, (0, 0))
+#         self.rect = pg.Rect(self.x, self.y, self.size[0], self.size[1])
+ 
+#     def show(self):
+#         screen.blit(button1.surface, (self.x, self.y))
+ 
+#     def click(self, event):
+#         x, y = pg.mouse.get_pos()
+#         if event.type == pg.MOUSEBUTTONDOWN:
+#             if pg.mouse.get_pressed()[0]:
+#                 if self.rect.collidepoint(x, y):
+#                     self.change_text(self.feedback, bg="RED")
 
 
 running = False
@@ -161,6 +169,8 @@ while running:
 			pg.quit()
 			sys.exit()
 
+		if event.type == pg.K_e:
+			print("E pressed")
 
 	pg.display.update()
 	# Limit the framerate
