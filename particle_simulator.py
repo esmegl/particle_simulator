@@ -73,13 +73,6 @@ class Sandbox:
 			# Get the x and y coordinates to draw the rectangle
 			x, y = uflattern_index(i)
 
-			# Checks if y+1, y-1, x-1 and x+1 are out of range
-			if ((y + 1) >= TILE_INDEX_Y or
-				(x + 1) >= TILE_INDEX_X or
-				(y - 1) < 0 or
-				(x - 1) < 0):
-				continue
-
 			# If both places (left and right) are empty select a place to fall randomly
 			left = random.randint(0, 9)
 			right = random.randint(0, 9)
@@ -93,24 +86,26 @@ class Sandbox:
 			# Index down to the rigth
 			tile_index_dr = flatten_index(x + 1, y + 1)
 
-			# If the space below is empty "fall"
-			if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
-				self.grid[i] = 0
-				self.grid[tile_index_d] = 1
+			if tile_index_d < len(self.grid):
 
-			# If the space below is not empty fall to the sides
-			# Prevents (x + 1) or (x -1) are out of range
-			elif (self.grid[i] == 1) and (self.grid[tile_index_d] == 1) :
-				
-				# If the space down is taken, fall left or right
-				if (left > right) and (self.grid[tile_index_dl] == 0):
+				# If the space below is empty "fall"
+				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
 					self.grid[i] = 0
-					self.grid[tile_index_dl] = 1
+					self.grid[tile_index_d] = 1
 
-				else: 
-					if (left <= right) and self.grid[tile_index_dr] == 0:
+				# If the space below is not empty fall to the sides
+				# Prevents (x + 1) or (x -1) are out of range
+				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 1) and tile_index_dl < len(self.grid) and tile_index_dr < len(self.grid):
+					
+					# If the space down is taken, fall left or right
+					if (left > right) and (self.grid[tile_index_dl] == 0):
 						self.grid[i] = 0
-						self.grid[tile_index_dr] = 1
+						self.grid[tile_index_dl] = 1
+
+					else: 
+						if (left <= right) and self.grid[tile_index_dr] == 0:
+							self.grid[i] = 0
+							self.grid[tile_index_dr] = 1
 
 
 	def draw (self):
@@ -133,46 +128,50 @@ class Sandbox:
 			elif self.grid[i] == 4:
 				pg.draw.rect(SCREEN, ORANGE, r, 0)
 
-# class Button:
- 
-#     def __init__(self, text, bg="BLACK", feedback=""):
-#         self.pos = (0, 0)
-#         self.font = pg.font.SysFont("Arial", font)
-#         if feedback == "":
-#             self.feedback = "text"
-#         else:
-#             self.feedback = feedback
-#         self.change_text(text, bg)
- 
-#     def change_text(self, text, bg="BLACK"):
-#         """Change the text whe you click"""
-#         self.text = self.font.render(text, 1, pg.Color("WHITE"))
-#         self.size = self.text.get_size()
-#         self.surface = pg.Surface(self.size)
-#         self.surface.fill(bg)
-#         self.surface.blit(self.text, (0, 0))
-#         self.rect = pg.Rect(self.x, self.y, self.size[0], self.size[1])
- 
-#     def show(self):
-#         screen.blit(button1.surface, (self.x, self.y))
- 
-#     def click(self, event):
-#         x, y = pg.mouse.get_pos()
-#         if event.type == pg.MOUSEBUTTONDOWN:
-#             if pg.mouse.get_pressed()[0]:
-#                 if self.rect.collidepoint(x, y):
-#                     self.change_text(self.feedback, bg="RED")
+	def erase(self):
+		self.grid = [0 for i in range(TILE_Q)]
 
-# class Button:
+class Button():
 
-# 	def __init__(self, x, y):
+	def __init__(self, val, color, x, y, text=''):
+		self.color = color
+		self.x = x
+		self.y = y
+		self.width = BUT_WIDTH
+		self.height = BUT_HEIGHT
+		self.text = text
+		# Set the value for the grid acording the type of particle
+		self.val = val
 
-# 		r = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+	def is_over(self, pos):
+		if pos[0] > self.x and pos[0] < self.x + self.width:
+			if pos[1] > self.y and pos[1] < self.y + self.height:
+				return True
+		
+		return False 
 
+	def draw(self, SCREEN, outline):
 
+		# pos = (self.x, self.y)
+		# over = self.is_over(pos)
+		# print(over)
+		if outline:
+			pg.draw.rect(SCREEN, outline, (self.x - 2,self.y - 2,self.width + 4,self.height + 4),0)
+            
+		pg.draw.rect(SCREEN, self.color, (self.x,self.y,self.width,self.height),0)
+        
+		if self.text != '':
+			font = pg.font.SysFont('comicsans', 30)
+			text = font.render(self.text, 1, WHITE)
+			# Center the text in the middle of the rectangle
+			SCREEN.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
  
 
 sandbox = Sandbox()
+erase_button = Button(0,BLACK, WINDOW_WIDTH - BUT_WIDTH - 10, 10, "E")
+sand_button = Button(1, YELLOW, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 10, "S")
+water_button = Button(2, BLUE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 40, "W")
+
 running = True
 # ---------------------------------- Main loop ---------------------------------- #
 while running:
@@ -184,11 +183,18 @@ while running:
 			pg.quit()
 			sys.exit()
 
-		if event.type == pg.KEYDOWN or event.type == pg.KEYUP:
-			if event.mod == pg.K_SPACE:
-				print("Space pressed")
+		pos = pg.mouse.get_pos()
+		if event.type == pg.MOUSEBUTTONDOWN:
+			if erase_button.is_over(pos):
+				sandbox.erase()
+				print("Erase works!")
 
-			
+		if event.type == pg.MOUSEMOTION:
+			if erase_button.is_over(pos):
+				erase_button.color = L_GREY
+			else:
+				erase_button.color = BLACK
+
 
 	pg.display.update()
 	# Limit the framerate
@@ -197,4 +203,7 @@ while running:
 	# draw_grid()
 	sandbox.update()
 	sandbox.draw()
+	erase_button.draw(SCREEN, None)
+	sand_button.draw(SCREEN, None)
+	water_button.draw(SCREEN, None)
 

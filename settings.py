@@ -10,7 +10,15 @@ WINDOW_HEIGHT = 720
 AREA = WINDOW_WIDTH * WINDOW_HEIGHT
 FRICTION = 0.05
 ACCELERATION = 9.8
-FPS = 30
+FPS = 60
+
+# ---------------------------------- Button settings ---------------------------------- #
+
+BUT_WIDTH = 30
+BUT_HEIGHT = 30
+
+
+# ---------------------------------- Grid settings ---------------------------------- #
 
 # Grid box size
 TILE_SIZE = 10
@@ -19,11 +27,6 @@ TILE_INDEX_Y = WINDOW_HEIGHT // TILE_SIZE
 
 # Total number of tiles
 TILE_Q = int(WINDOW_HEIGHT / TILE_SIZE) * int(WINDOW_WIDTH / TILE_SIZE)
-
-# ---------------------------------- Button settings ---------------------------------- #
-
-BUT_WIDTH = 80
-BUT_HEIGHT = 80
 
 # ---------------------------------- Colors ---------------------------------- #
 #           R	 G    B   A
