@@ -33,6 +33,10 @@ def draw_grid():
 	for j in range(0, WINDOW_HEIGHT, TILE_SIZE):
 		pg.draw.line(SCREEN, L_GREY, (0, j), (WINDOW_WIDTH, j), 1)
 
+# ---------------------------------- Variables ---------------------------------- #
+
+
+
 # ---------------------------------- Classes ---------------------------------- #
 
 class Sandbox:
@@ -67,41 +71,46 @@ class Sandbox:
 
 		for i in range(len(self.grid), 0, -1):
 			# Get the x and y coordinates to draw the rectangle
-			(x, y) = uflattern_index(i)
+			x, y = uflattern_index(i)
+
+			# Checks if y+1, y-1, x-1 and x+1 are out of range
+			if ((y + 1) >= TILE_INDEX_Y or
+				(x + 1) >= TILE_INDEX_X or
+				(y - 1) < 0 or
+				(x - 1) < 0):
+				continue
 
 			# If both places (left and right) are empty select a place to fall randomly
 			left = random.randint(0, 9)
 			right = random.randint(0, 9)
 
-			# Checks if y + 1 is out of range
-			if (y + 1 < TILE_INDEX_Y):
-				# Tile number of the tile below
-				tile_index_d = flatten_index(x, y + 1)
-				# Index down to the left
-				tile_index_dl = flatten_index(x - 1, y + 1)
+			# Tile number of the tile below
+			tile_index_d = flatten_index(x, y + 1)
+			# Index of the upper tile
+			tile_index_u = flatten_index(x, y - 1)
+			# Index down to the left
+			tile_index_dl = flatten_index(x - 1, y + 1)
+			# Index down to the rigth
+			tile_index_dr = flatten_index(x + 1, y + 1)
 
-				# If the space below is empty "fall"
-				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
+			# If the space below is empty "fall"
+			if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
+				self.grid[i] = 0
+				self.grid[tile_index_d] = 1
+
+			# If the space below is not empty fall to the sides
+			# Prevents (x + 1) or (x -1) are out of range
+			elif (self.grid[i] == 1) and (self.grid[tile_index_d] == 1) :
+				
+				# If the space down is taken, fall left or right
+				if (left > right) and (self.grid[tile_index_dl] == 0):
 					self.grid[i] = 0
-					self.grid[tile_index_d] = 1
+					self.grid[tile_index_dl] = 1
 
-				# If the space below is not empty fall to the sides
-				# Prevents (x + 1) or (x -1) are out of range
-				elif (self.grid[tile_index_d] == 1) and (x - 1) > 0 and (x + 1) < TILE_INDEX_X:
-					
-					# If the space down is taken, fall left or right
-					if (left > right) and (self.grid[tile_index_dl] == 0):
+				else: 
+					if (left <= right) and self.grid[tile_index_dr] == 0:
 						self.grid[i] = 0
-						self.grid[tile_index_dl] = 1
-						# print(tile_index_dl)
-
-					# else: 
-					# 	# Index down to the right
-					# 	tile_index_dr = flatten_index(x + 1, y)
-
-					# 	if (left <= right) and self.grid[tile_index_dr] == 0:
-					# 		self.grid[i] = 0
-					# 		self.grid[tile_index_dr] = 1
+						self.grid[tile_index_dr] = 1
 
 
 	def draw (self):
@@ -154,8 +163,14 @@ class Sandbox:
 #                 if self.rect.collidepoint(x, y):
 #                     self.change_text(self.feedback, bg="RED")
 
+# class Button:
 
-running = False
+# 	def __init__(self, x, y):
+
+# 		r = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+
+
+ 
 
 sandbox = Sandbox()
 running = True
@@ -169,13 +184,16 @@ while running:
 			pg.quit()
 			sys.exit()
 
-		if event.type == pg.K_e:
-			print("E pressed")
+		if event.type == pg.KEYDOWN or event.type == pg.KEYUP:
+			if event.mod == pg.K_SPACE:
+				print("Space pressed")
+
+			
 
 	pg.display.update()
 	# Limit the framerate
 	CLOCK.tick(FPS)
-	SCREEN.fill(BLACK)
+	SCREEN.fill(BGCOLOR)
 	# draw_grid()
 	sandbox.update()
 	sandbox.draw()

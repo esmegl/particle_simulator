@@ -20,6 +20,11 @@ TILE_INDEX_Y = WINDOW_HEIGHT // TILE_SIZE
 # Total number of tiles
 TILE_Q = int(WINDOW_HEIGHT / TILE_SIZE) * int(WINDOW_WIDTH / TILE_SIZE)
 
+# ---------------------------------- Button settings ---------------------------------- #
+
+BUT_WIDTH = 80
+BUT_HEIGHT = 80
+
 # ---------------------------------- Colors ---------------------------------- #
 #           R	 G    B   A
 WHITE =   (255, 255, 255,  1)
