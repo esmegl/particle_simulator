@@ -10,18 +10,17 @@ WINDOW_HEIGHT = 720
 AREA = WINDOW_WIDTH * WINDOW_HEIGHT
 FRICTION = 0.05
 ACCELERATION = 9.8
-FPS = 60
+FPS = 30
 
 # ---------------------------------- Button settings ---------------------------------- #
 
 BUT_WIDTH = 30
 BUT_HEIGHT = 30
 
-
 # ---------------------------------- Grid settings ---------------------------------- #
 
 # Grid box size
-TILE_SIZE = 10
+TILE_SIZE = 20
 TILE_INDEX_X = WINDOW_WIDTH // TILE_SIZE
 TILE_INDEX_Y = WINDOW_HEIGHT // TILE_SIZE
 

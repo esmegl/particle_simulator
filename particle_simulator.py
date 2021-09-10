@@ -52,7 +52,7 @@ class Sandbox:
 		self.water = 2
 		self.smoke = 3
 		self.fire = 4
-		self.explotion = 5
+		self.acid = 5
 		self.val = val
 
 	def update (self, val):
@@ -65,48 +65,110 @@ class Sandbox:
 		# Set tile index
 		mouse_tile_index = flatten_index(self.mouse_x, self.mouse_y) 
 
-		if pg.mouse.get_pressed(num_buttons=3)[0]:
-			# If the mouse is pressed set that tile to 1
+		# If the mouse is pressed set that tile to val if the value of the tile is 0
+		if pg.mouse.get_pressed(num_buttons=3)[0] and self.grid[mouse_tile_index] == 0:
 			self.grid[mouse_tile_index] = val
+
 		
 
 		for i in range(len(self.grid), 0, -1):
 			# Get the x and y coordinates to draw the rectangle
 			x, y = uflattern_index(i)
 
-			# If both places (left and right) are empty select a place to fall randomly
+			# If both places (left and right) are empty select a place to go randomly
 			left = random.randint(0, 9)
 			right = random.randint(0, 9)
 
+
+			# Index of the above tile
+			tile_index_u = flatten_index(x, y - 1)
+			# Index of the tile tile above to the left
+			tile_index_ul = flatten_index(x - 1, y - 1)
+			# Index of the tile above to the right
+			tile_index_ur = flatten_index(x + 1, y - 1)
 			# Tile number of the tile below
 			tile_index_d = flatten_index(x, y + 1)
-			# Index of the upper tile
-			tile_index_u = flatten_index(x, y - 1)
-			# Index down to the left
+			# Index below to the left
 			tile_index_dl = flatten_index(x - 1, y + 1)
-			# Index down to the rigth
+			# Index below to the rigth
 			tile_index_dr = flatten_index(x + 1, y + 1)
+			# Index of the tile to the left
+			tile_index_l = flatten_index(x - 1, y)
+			# Index of the tile to the rigth
+			tile_index_r = flatten_index(x + 1, y)
 
-			if tile_index_d < len(self.grid):
+
+# ------------------------------------- Sand physics ------------------------------------- #
+
+			if tile_index_d < len(self.grid) and (val == self.sand):
 
 				# If the space below is empty "fall"
-				if (self.grid[i] != 0) and (self.grid[tile_index_d] == 0):
+				if (self.grid[i] == self.sand) and (self.grid[tile_index_d] == 0):
 					self.grid[i] = 0
-					self.grid[tile_index_d] = val
+					self.grid[tile_index_d] = self.sand
 
 				# If the space below is not empty fall to the sides
 				# Prevents (x + 1) or (x -1) are out of range
-				if (self.grid[i] != 0) and (self.grid[tile_index_d] != 0) and tile_index_dl < len(self.grid) and tile_index_dr < len(self.grid):
+				elif (self.grid[i] == self.sand) and (self.grid[tile_index_d] != 0) and tile_index_dl < len(self.grid) and tile_index_dr < len(self.grid):
 					
 					# If the space down is taken, fall left or right
-					if (left > right) and (self.grid[tile_index_dl] == 0):
+					if (left > right) and (self.grid[tile_index_dl] == 0) and (self.grid[tile_index_l] == 0):
 						self.grid[i] = 0
-						self.grid[tile_index_dl] = val
+						self.grid[tile_index_dl] = self.sand
 
-					else: 
-						if (left <= right) and self.grid[tile_index_dr] == 0:
-							self.grid[i] = 0
-							self.grid[tile_index_dr] = val
+					elif self.grid[tile_index_dr] == 0 and (self.grid[tile_index_r] == 0):
+						self.grid[i] = 0
+						self.grid[tile_index_dr] = self.sand
+
+# ------------------------------------- Water physics ------------------------------------- #	
+
+			if tile_index_d < len(self.grid) and (val == self.water):
+
+				# If the space below is empty "fall"
+				if (self.grid[i] == self.water) and (self.grid[tile_index_d] == 0):
+					self.grid[i] = 0
+					self.grid[tile_index_d] = self.water
+
+				# If the space below is not empty fall to the sides
+				# Prevents (x + 1) or (x -1) are out of range
+				elif (self.grid[i] == self.water) and (self.grid[tile_index_d] != 0):
+
+					# If the space down is taken, fall left or right
+					if (left > right) and (self.grid[tile_index_l] == 0) and tile_index_l < len(self.grid):
+						self.grid[i] = 0
+						self.grid[tile_index_l] = self.water
+
+					elif (self.grid[tile_index_r] == 0) and tile_index_r < len(self.grid):
+						self.grid[i] = 0
+						self.grid[tile_index_r] = self.water
+
+					# elif (self.grid[tile_index_dl] == )
+
+
+# ------------------------------------- Smoke physics ------------------------------------- #
+
+			if tile_index_u > len(self.grid) and val == self.smoke:
+				print("**********Step one: enter if statement, works!**********")
+				# If the space above is empty "fly"
+				if (self.grid[i] == self.smoke) and (self.grid[tile_index_u] == 0):
+					self.grid[i] = 0
+					self.grid[tile_index_u] = self.smoke
+					print("**********Step two: Fly, works!**********")
+
+				# If the space above is not empty 'fly' to the sides
+				# Prevents (x + 1) or (x -1) are out of range
+				elif (self.grid[i] == self.smoke) and (self.grid[tile_index_u] != 0) and tile_index_ul < len(self.grid) and tile_index_ur < len(self.grid):
+					
+					if (left > right) and (self.grid[tile_index_ul] == 0):
+						self.grid[i] = 0
+						self.grid[tile_index_ul] = self.smoke
+						print("**********Step three: Go left, works!**********")
+
+					elif self.grid[tile_index_ur] == 0:
+						self.grid[i] = 0
+						self.grid[tile_index_ur] = self.smoke
+						print("**********Step four: Go rigth, works!**********")
+
 
 
 	def draw (self):
@@ -120,14 +182,16 @@ class Sandbox:
 			x, y = uflattern_index(i)
 			r = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 
-			if self.grid[i] == 1:
+			if self.grid[i] == self.sand:
 				pg.draw.rect(SCREEN, YELLOW, r, 0)
-			elif self.grid[i] == 2:
+			elif self.grid[i] == self.water:
 				pg.draw.rect(SCREEN, BLUE, r, 0)
-			elif self.grid[i] == 3:
+			elif self.grid[i] == self.smoke:
 				pg.draw.rect(SCREEN, L_GREY, r, 0)
-			elif self.grid[i] == 4:
+			elif self.grid[i] == self.fire:
 				pg.draw.rect(SCREEN, ORANGE, r, 0)
+			elif self.grid[i] == self.acid:
+				pg.draw.rect(SCREEN, GREEN, r, 0)
 
 	def erase(self):
 		self.grid = [0 for i in range(TILE_Q)]
@@ -145,7 +209,6 @@ class Button():
 		self.text = text
 		self.color_txt = color_txt
 		self.font_size = font_size
-		# Set the value for the grid acording the type of particle
 
 	def is_over(self, pos):
 		if pos[0] > self.x and pos[0] < self.x + self.width:
@@ -171,6 +234,7 @@ sand_button = Button(YELLOW, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 
 water_button = Button(BLUE, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 60, 30, "W")
 smoke_button = Button(L_GREY, BLACK, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 100, 30, "K")
 fire_button = Button(ORANGE, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 140, 30, "F")
+acid_button = Button(GREEN, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 180, 30, "A")
 
 # Initial value of val (sand)
 val = 1
@@ -189,6 +253,7 @@ while running:
 		pos = pg.mouse.get_pos()
 		if event.type == pg.MOUSEBUTTONDOWN:
 			if erase_button.is_over(pos):
+				val = 0
 				sandbox.erase()
 			elif sand_button.is_over(pos):
 				val = 1
@@ -198,6 +263,8 @@ while running:
 				val = 3
 			elif fire_button.is_over(pos):
 				val = 4
+			elif acid_button.is_over(pos):
+				val = 5
 				
 		# If the mouse is over a button, change color of the button
 		if event.type == pg.MOUSEMOTION:
@@ -226,6 +293,11 @@ while running:
 			else:
 				fire_button.color = D_ORANGE
 
+			if acid_button.is_over(pos):
+				acid_button.color = GREEN
+			else:
+				acid_button.color = D_GREEN
+
 
 
 	pg.display.update()
@@ -240,4 +312,4 @@ while running:
 	water_button.draw(SCREEN)
 	smoke_button.draw(SCREEN)
 	fire_button.draw(SCREEN)
-
+	acid_button.draw(SCREEN)
