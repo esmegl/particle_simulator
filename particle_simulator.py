@@ -41,7 +41,7 @@ def draw_grid():
 
 class Sandbox:
 
-	def __init__(self):
+	def __init__(self, val=0):
 
 		# Grid array size (WINDOW_HEIGHT / TILE_SIZE) * (WINDOW_WIDHT / TILE_SIZE), enumerate the tiles
 		self.grid = [0 for i in range(TILE_Q)]
@@ -53,8 +53,9 @@ class Sandbox:
 		self.smoke = 3
 		self.fire = 4
 		self.explotion = 5
+		self.val = val
 
-	def update (self):
+	def update (self, val):
 
 		# Get mouse coordinates converted to tile coordinates 
 		self.mouse_x = pg.mouse.get_pos()[0] // TILE_SIZE
@@ -66,7 +67,7 @@ class Sandbox:
 
 		if pg.mouse.get_pressed(num_buttons=3)[0]:
 			# If the mouse is pressed set that tile to 1
-			self.grid[mouse_tile_index] = 1
+			self.grid[mouse_tile_index] = val
 		
 
 		for i in range(len(self.grid), 0, -1):
@@ -89,23 +90,23 @@ class Sandbox:
 			if tile_index_d < len(self.grid):
 
 				# If the space below is empty "fall"
-				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 0):
+				if (self.grid[i] != 0) and (self.grid[tile_index_d] == 0):
 					self.grid[i] = 0
-					self.grid[tile_index_d] = 1
+					self.grid[tile_index_d] = val
 
 				# If the space below is not empty fall to the sides
 				# Prevents (x + 1) or (x -1) are out of range
-				if (self.grid[i] == 1) and (self.grid[tile_index_d] == 1) and tile_index_dl < len(self.grid) and tile_index_dr < len(self.grid):
+				if (self.grid[i] != 0) and (self.grid[tile_index_d] != 0) and tile_index_dl < len(self.grid) and tile_index_dr < len(self.grid):
 					
 					# If the space down is taken, fall left or right
 					if (left > right) and (self.grid[tile_index_dl] == 0):
 						self.grid[i] = 0
-						self.grid[tile_index_dl] = 1
+						self.grid[tile_index_dl] = val
 
 					else: 
 						if (left <= right) and self.grid[tile_index_dr] == 0:
 							self.grid[i] = 0
-							self.grid[tile_index_dr] = 1
+							self.grid[tile_index_dr] = val
 
 
 	def draw (self):
@@ -131,17 +132,20 @@ class Sandbox:
 	def erase(self):
 		self.grid = [0 for i in range(TILE_Q)]
 
+
+
 class Button():
 
-	def __init__(self, val, color, x, y, text=''):
+	def __init__(self, color, color_txt, x, y, font_size, text=''):
 		self.color = color
 		self.x = x
 		self.y = y
 		self.width = BUT_WIDTH
 		self.height = BUT_HEIGHT
 		self.text = text
+		self.color_txt = color_txt
+		self.font_size = font_size
 		# Set the value for the grid acording the type of particle
-		self.val = val
 
 	def is_over(self, pos):
 		if pos[0] > self.x and pos[0] < self.x + self.width:
@@ -150,28 +154,26 @@ class Button():
 		
 		return False 
 
-	def draw(self, SCREEN, outline):
-
-		# pos = (self.x, self.y)
-		# over = self.is_over(pos)
-		# print(over)
-		if outline:
-			pg.draw.rect(SCREEN, outline, (self.x - 2,self.y - 2,self.width + 4,self.height + 4),0)
+	def draw(self, SCREEN):
             
 		pg.draw.rect(SCREEN, self.color, (self.x,self.y,self.width,self.height),0)
         
 		if self.text != '':
-			font = pg.font.SysFont('comicsans', 30)
-			text = font.render(self.text, 1, WHITE)
+			font = pg.font.SysFont('comicsans', self.font_size)
+			text = font.render(self.text, 1, self.color_txt)
 			# Center the text in the middle of the rectangle
 			SCREEN.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
  
 
 sandbox = Sandbox()
-erase_button = Button(0,BLACK, WINDOW_WIDTH - BUT_WIDTH - 10, 10, "E")
-sand_button = Button(1, YELLOW, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 10, "S")
-water_button = Button(2, BLUE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 40, "W")
+erase_button = Button(BLACK, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, 10, 30, "E")
+sand_button = Button(YELLOW, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 20, 30, "S")
+water_button = Button(BLUE, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 60, 30, "W")
+smoke_button = Button(L_GREY, BLACK, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 100, 30, "K")
+fire_button = Button(ORANGE, WHITE, WINDOW_WIDTH - BUT_WIDTH - 10, BUT_HEIGHT + 140, 30, "F")
 
+# Initial value of val (sand)
+val = 1
 running = True
 # ---------------------------------- Main loop ---------------------------------- #
 while running:
@@ -183,17 +185,47 @@ while running:
 			pg.quit()
 			sys.exit()
 
+		# Select the type of particle
 		pos = pg.mouse.get_pos()
 		if event.type == pg.MOUSEBUTTONDOWN:
 			if erase_button.is_over(pos):
 				sandbox.erase()
-				print("Erase works!")
-
+			elif sand_button.is_over(pos):
+				val = 1
+			elif water_button.is_over(pos):
+				val = 2
+			elif smoke_button.is_over(pos):
+				val = 3
+			elif fire_button.is_over(pos):
+				val = 4
+				
+		# If the mouse is over a button, change color of the button
 		if event.type == pg.MOUSEMOTION:
 			if erase_button.is_over(pos):
 				erase_button.color = L_GREY
 			else:
 				erase_button.color = BLACK
+
+			if sand_button.is_over(pos):
+				sand_button.color = YELLOW
+			else:
+				sand_button.color = D_YELLOW
+
+			if water_button.is_over(pos):
+				water_button.color = BLUE
+			else:
+				water_button.color = D_BLUE
+
+			if smoke_button.is_over(pos):
+				smoke_button.color = L_GREY
+			else:
+				smoke_button.color = GREY
+
+			if fire_button.is_over(pos):
+				fire_button.color = ORANGE
+			else:
+				fire_button.color = D_ORANGE
+
 
 
 	pg.display.update()
@@ -201,9 +233,11 @@ while running:
 	CLOCK.tick(FPS)
 	SCREEN.fill(BGCOLOR)
 	# draw_grid()
-	sandbox.update()
+	sandbox.update(val)
 	sandbox.draw()
-	erase_button.draw(SCREEN, None)
-	sand_button.draw(SCREEN, None)
-	water_button.draw(SCREEN, None)
+	erase_button.draw(SCREEN)
+	sand_button.draw(SCREEN)
+	water_button.draw(SCREEN)
+	smoke_button.draw(SCREEN)
+	fire_button.draw(SCREEN)
 

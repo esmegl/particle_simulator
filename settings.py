@@ -29,15 +29,22 @@ TILE_INDEX_Y = WINDOW_HEIGHT // TILE_SIZE
 TILE_Q = int(WINDOW_HEIGHT / TILE_SIZE) * int(WINDOW_WIDTH / TILE_SIZE)
 
 # ---------------------------------- Colors ---------------------------------- #
-#           R	 G    B   A
-WHITE =   (255, 255, 255,  1)
-BLACK =   (  0,   0,   0,  1)
-RED =	  (255,   0,   0,  1)   
-GREEN =   (  0, 255,   0,  1)
-BLUE =	  ( 61, 157, 212,  1)
-ORANGE =  (255, 111,   0,  1)
-YELLOW =  (212, 187,  61,  1)
-VIOLET =  (205,   0, 255,  1)
-L_GREY =  (212, 210, 210,  1)
-BGCOLOR = ( 32,  53, 111,  1)
+#            R	  G    B   A
+WHITE =    (255, 255, 255,  1)
+BLACK =    (  0,   0,   0,  1)
+D_RED =	   (229,  46,  46,  1)
+RED =      (207,  88,  87,  1)
+D_GREEN =  (108, 185,  80,  1)   
+GREEN =    (151, 223,  96,  1)
+D_BLUE =   ( 68, 150, 212,  1)
+BLUE =     ( 67, 192, 231,  1)
+D_ORANGE = (212, 122,  71,  1)
+ORANGE =   (229, 148,  72,  1)
+D_YELLOW = (214, 187, 102,  1)
+YELLOW =   (239, 189,  98,  1)
+VIOLET =   (167,  60, 112,  1)
+D_VIOLET = (118,  26,  53,  1)
+GREY =     (165, 165, 165,  1)
+L_GREY =   (212, 210, 210,  1)
+BGCOLOR =  ( 32,  53, 111,  1)
 
