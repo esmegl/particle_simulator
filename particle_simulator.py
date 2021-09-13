@@ -133,6 +133,9 @@ class Sandbox:
 				# Prevents (x + 1) or (x -1) are out of range
 				elif (self.grid[i] == self.water) and (self.grid[tile_index_d] != 0):
 
+					left = random.randint(0, 9)
+					right = random.randint(0, 9)
+
 					# If the space down is taken, fall left or right
 					if (left > right) and (self.grid[tile_index_l] == 0) and tile_index_l < len(self.grid):
 						self.grid[i] = 0
